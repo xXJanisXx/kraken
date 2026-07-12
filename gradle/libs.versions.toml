@@ -1,0 +1,14 @@
+[versions]
+kotlin = "2.4.0"
+
+gradle-publish = "2.1.1"
+central-publisher = "1.2.4"
+
+[libraries]
+kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test" }
+
+central-publisher = { module = "net.thebugmc.gradle.sonatype-central-portal-publisher:net.thebugmc.gradle.sonatype-central-portal-publisher.gradle.plugin", version.ref = "central-publisher" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+gradle-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-publish" }
