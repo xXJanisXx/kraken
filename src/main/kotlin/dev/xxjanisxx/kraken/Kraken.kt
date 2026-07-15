@@ -6,14 +6,12 @@ import net.thebugmc.gradle.sonatypepublisher.CentralPortalExtension
 import net.thebugmc.gradle.sonatypepublisher.SonatypeCentralPortalPublisherPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.logging.Logger
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.plugins.signing.SigningExtension
 
 class Kraken : Plugin<Project> {
 
     override fun apply(project: Project) {
-        val logger = project.logger
         val providers = project.providers
 
         val maven = project.extensions.create("maven", MavenExtension::class.java, project.objects)
@@ -34,19 +32,20 @@ class Kraken : Plugin<Project> {
         centralPortal.publishingType.convention(maven.publishingType.map { it.toCentral() })
         centralPortal.pom { pom -> maven.configurePom(pom) }
 
-        // Link custom repositories to Gradle's publishing system
         project.plugins.withId("maven-publish") {
             val publishing = project.extensions.getByType(PublishingExtension::class.java)
 
-            maven.repositories.all { customRepo ->
-                publishing.repositories.maven { repo ->
-                    repo.name = customRepo.name
-                    repo.url = project.uri(customRepo.url)
+            project.afterEvaluate {
+                maven.repositories.forEach { customRepo ->
+                    publishing.repositories.maven { repo ->
+                        repo.name = customRepo.name
+                        repo.url = project.uri(customRepo.url.get())
 
-                    if (customRepo.username.isPresent) {
-                        repo.credentials { credentials ->
-                            credentials.username = customRepo.username.get()
-                            credentials.password = customRepo.password.orNull
+                        if (customRepo.username.isPresent) {
+                            repo.credentials { credentials ->
+                                credentials.username = customRepo.username.orNull
+                                credentials.password = customRepo.password.orNull
+                            }
                         }
                     }
                 }
@@ -54,11 +53,11 @@ class Kraken : Plugin<Project> {
         }
 
         project.afterEvaluate {
-            configureSigning(project, maven, logger)
+            configureSigning(project, maven)
         }
     }
 
-    private fun configureSigning(project: Project, maven: MavenExtension, logger: Logger) {
+    private fun configureSigning(project: Project, maven: MavenExtension) {
         val signing = project.extensions.getByType(SigningExtension::class.java)
         val key = maven.signingKey.orNull
         val password = maven.signingPassword.orNull
@@ -66,7 +65,6 @@ class Kraken : Plugin<Project> {
 
         if (key.isNullOrBlank()) {
             signing.isRequired = false
-            logger.warn("No signing key found (SIGNING_KEY). Artifacts will be unsigned.")
             return
         }
 
