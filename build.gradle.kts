@@ -9,7 +9,7 @@ plugins {
 
 group = "dev.xxjanisxx"
 description = "A Gradle plugin to publish artifacts to Maven Central."
-version = "1.0.0"
+version = "1.1.0"
 
 gradlePlugin {
     website = "https://github.com/xXJanisXx/kraken"
