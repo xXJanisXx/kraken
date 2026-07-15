@@ -7,6 +7,7 @@ import net.thebugmc.gradle.sonatypepublisher.SonatypeCentralPortalPublisherPlugi
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.logging.Logger
+import org.gradle.api.publish.PublishingExtension
 import org.gradle.plugins.signing.SigningExtension
 
 class Kraken : Plugin<Project> {
@@ -15,7 +16,7 @@ class Kraken : Plugin<Project> {
         val logger = project.logger
         val providers = project.providers
 
-        val maven = project.extensions.create("maven", MavenExtension::class.java)
+        val maven = project.extensions.create("maven", MavenExtension::class.java, project.objects)
         maven.artifactId.convention(providers.provider { project.name })
         maven.publishingType.convention(PublishingType.AUTOMATIC)
         maven.username.convention(providers.environmentVariable("MAVEN_USER"))
@@ -32,6 +33,25 @@ class Kraken : Plugin<Project> {
         centralPortal.name.convention(maven.artifactId)
         centralPortal.publishingType.convention(maven.publishingType.map { it.toCentral() })
         centralPortal.pom { pom -> maven.configurePom(pom) }
+
+        // Link custom repositories to Gradle's publishing system
+        project.plugins.withId("maven-publish") {
+            val publishing = project.extensions.getByType(PublishingExtension::class.java)
+
+            maven.repositories.all { customRepo ->
+                publishing.repositories.maven { repo ->
+                    repo.name = customRepo.name
+                    repo.url = project.uri(customRepo.url)
+
+                    if (customRepo.username.isPresent) {
+                        repo.credentials { credentials ->
+                            credentials.username = customRepo.username.get()
+                            credentials.password = customRepo.password.orNull
+                        }
+                    }
+                }
+            }
+        }
 
         project.afterEvaluate {
             configureSigning(project, maven, logger)

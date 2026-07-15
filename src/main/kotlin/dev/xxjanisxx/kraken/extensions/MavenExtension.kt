@@ -1,7 +1,10 @@
 package dev.xxjanisxx.kraken.extensions
 
 import dev.xxjanisxx.kraken.publish.PublishingType
+import dev.xxjanisxx.kraken.repository.KrakenRepository
 import org.gradle.api.Action
+import org.gradle.api.NamedDomainObjectContainer
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.publish.maven.MavenPom
 import org.gradle.api.publish.maven.MavenPomCiManagement
@@ -9,9 +12,12 @@ import org.gradle.api.publish.maven.MavenPomDeveloperSpec
 import org.gradle.api.publish.maven.MavenPomLicenseSpec
 import org.gradle.api.publish.maven.MavenPomOrganization
 import org.gradle.api.publish.maven.MavenPomScm
+import javax.inject.Inject
 
-/** The maven extension used to configure publishing to Maven Central. */
-abstract class MavenExtension {
+/** The maven extension used to configure publishing to Maven Central or custom repositories. */
+abstract class MavenExtension @Inject constructor(
+    objects: ObjectFactory
+) {
 
     /** The Maven artifactId. Defaults to the project name. */
     abstract val artifactId: Property<String>
@@ -40,11 +46,20 @@ abstract class MavenExtension {
     /** Optional PGP key id. Defaults to the SIGNING_KEY_ID environment variable. */
     abstract val signingKeyId: Property<String>
 
+    /** Custom repositories for publishing (e.g., Reposilite, Nexus). */
+    val repositories: NamedDomainObjectContainer<KrakenRepository> =
+        objects.domainObjectContainer(KrakenRepository::class.java)
+
     private val developers = mutableListOf<Action<in MavenPomDeveloperSpec>>()
     private val licenses = mutableListOf<Action<in MavenPomLicenseSpec>>()
     private val scm = mutableListOf<Action<in MavenPomScm>>()
     private val ciManagement = mutableListOf<Action<in MavenPomCiManagement>>()
     private val organization = mutableListOf<Action<in MavenPomOrganization>>()
+
+    /** Configure custom repositories. */
+    fun repositories(action: Action<in NamedDomainObjectContainer<KrakenRepository>>) {
+        action.execute(repositories)
+    }
 
     /** Declare project developers. */
     fun developers(action: Action<in MavenPomDeveloperSpec>) {

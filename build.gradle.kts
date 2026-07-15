@@ -8,8 +8,8 @@ plugins {
 }
 
 group = "dev.xxjanisxx"
-description = "A Gradle plugin to publish artifacts to Maven Central."
-version = "1.0.0"
+description = "A Gradle plugin to publish artifacts to Maven Central or Custom Repositories."
+version = "1.1.0"
 
 gradlePlugin {
     website = "https://github.com/xXJanisXx/kraken"
@@ -20,7 +20,7 @@ gradlePlugin {
             id = "dev.xxjanisxx.kraken"
             implementationClass = "dev.xxjanisxx.kraken.Kraken"
             displayName = "Kraken"
-            description = "A Gradle plugin to publish artifacts to Maven Central."
+            description = "A Gradle plugin to publish artifacts to Maven Central or Custom Repositories."
             tags = listOf("publishing", "maven", "maven-central", "sonatype", "central-portal")
         }
     }
