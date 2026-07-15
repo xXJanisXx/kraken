@@ -1,6 +1,6 @@
 # Kraken
 
-A Gradle plugin to publish artifacts to Maven Central.
+A Gradle plugin to publish artifacts to Maven Central or custom, private repositories.
 
 ## Usage
 
@@ -46,6 +46,20 @@ maven {
         url = "https://example.com"
     }
 
+    // Optional: Configure custom, private target repositories (e.g., Reposilite, Nexus, Artifactory)
+    repositories {
+        register("releases") {
+            url.set("https://repo.codemc.io/repository/maven-releases/")
+            username.set(System.getenv("REPOSILITE_USER"))
+            password.set(System.getenv("REPOSILITE_PASSWORD"))
+        }
+        register("snapshots") {
+            url.set("https://repo.codemc.io/repository/maven-snapshots/")
+            username.set(System.getenv("REPOSILITE_USER"))
+            password.set(System.getenv("REPOSILITE_PASSWORD"))
+        }
+    }
+
     // Credentials and signing keys default to the environment variables below,
     // but can be overridden here if needed:
     // username = "..."
@@ -68,8 +82,9 @@ maven {
 
 ## Tasks
 
-| Task                     | Description                                     |
-|--------------------------|-------------------------------------------------|
-| `publishToCentralPortal` | Uploads the bundle to the Sonatype Central Portal |
-| `generateBundle`         | Creates the upload bundle                       |
-| `checksumBundle`         | Generates `.md5` / `.sha1` checksums            |
+| Task                                        | Description                                                   |
+|---------------------------------------------|---------------------------------------------------------------|
+| `publishToCentralPortal`                    | Uploads the bundle to the Sonatype Central Portal             |
+| `generateBundle`                            | Creates the upload bundle                                     |
+| `checksumBundle`                            | Generates `.md5` / `.sha1` checksums                          |
+| `publishAllPublicationsTo[Name]Repository`  | Publishes all publications to the specified custom repository |
