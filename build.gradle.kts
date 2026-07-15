@@ -42,7 +42,7 @@ dependencies {
 kotlin {
     jvmToolchain(25)
     compilerOptions {
-        jvmTarget = JvmTarget.JVM_25
+        jvmTarget = JvmTarget.JVM_21
         languageVersion = KotlinVersion.KOTLIN_2_4
         apiVersion = KotlinVersion.KOTLIN_2_4
     }
@@ -51,7 +51,7 @@ kotlin {
 java {
     withSourcesJar()
     withJavadocJar()
-    toolchain.languageVersion.set(JavaLanguageVersion.of(25))
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
 
 tasks.test {
